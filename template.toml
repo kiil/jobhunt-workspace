@@ -1,0 +1,7 @@
+format = 1
+id = "jobhunt"
+name = "Job Hunt"
+description = "A job search as a graph: master CV, tailored variants, cover letters that carry state and contact log, and a watch."
+version = "1.0.0"
+authors = ["Lennart Kiil"]
+license = "MIT"

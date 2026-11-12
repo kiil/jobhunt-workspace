@@ -1,0 +1,8 @@
+$schema: https://document-schema.org/draft/2026-06/schema
+description: An organization and its application notes.
+frontmatter:
+  type: object
+  required: [type, name]
+  properties:
+    type: { const: organization }
+    name: { type: string, minLength: 1 }

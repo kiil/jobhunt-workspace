@@ -1,0 +1,219 @@
+$schema: https://document-schema.org/draft/2026-06/schema
+
+description: One cover letter for one application, with its application state and contact log.
+
+frontmatter:
+  type: object
+  required: [type, company, position, language, status]
+  properties:
+    type:
+      const: cover-letter
+    company:
+      type: string
+      minLength: 1
+    position:
+      type: string
+      minLength: 1
+    language:
+      enum: [en, da, de, fr, es, sv, nb, nl]
+    status:
+      enum: [draft, sent, confirmed, interview, offer, rejected, withdrawn]
+      description: >
+        The terminal state of the application. Things status cannot say have
+        their own fields: interviewed, solicited, archived.
+    cv:
+      type: string
+      description: the cv/ variant sent with this letter
+      pattern: '^[a-z0-9-]+$'
+    url:
+      type: [string, "null"]
+      description: link to the job posting
+    ats:
+      type: [string, "null"]
+      description: applicant tracking system, if known
+    contact:
+      type: [string, "null"]
+      description: >
+        Name, and ideally title, of the primary person the posting says you
+        may contact. Lists and follow-up checks read this field.
+    contact_phone:
+      type: [string, "null"]
+      pattern: '^\+[0-9]{1,3} [0-9][0-9 ]{5,15}$'
+      description: >
+        The contact's number, always with country code and a plus sign. The
+        country code is free because the field describes someone else, who
+        may well sit abroad.
+    contact_email:
+      type: [string, "null"]
+      format: email
+      description: >
+        Only an address that reaches a person. Careers and no-reply
+        mailboxes do not belong here; nobody there can answer a question.
+    contacts:
+      type: [array, "null"]
+      description: >
+        Everyone the posting names as someone you may contact, with role and
+        number for each. The contact* scalars stay the primary contact; this
+        list holds the rest, because who you call depends on what you want
+        to ask.
+      items:
+        type: object
+        required: [name]
+        properties:
+          name: { type: string, minLength: 1 }
+          role: { type: [string, "null"] }
+          phone:
+            type: [string, "null"]
+            pattern: '^\+[0-9]{1,3} [0-9][0-9 ]{5,15}$'
+          email:
+            type: [string, "null"]
+            format: email
+    tags:
+      type: [array, "null"]
+      uniqueItems: true
+      description: >
+        What the role is about: industry, field or both. The vocabulary is
+        closed so it can be counted and filtered; a free-text field turns
+        into «finance», «Finance» and «financial sector» within a month.
+      items:
+        enum:
+          - finance
+          - accounting
+          - insurance
+          - pension
+          - legal
+          - public-sector
+          - defence
+          - health
+          - medtech
+          - pharma
+          - industry
+          - retail
+          - logistics
+          - construction
+          - energy
+          - culture
+          - media
+          - education
+          - consulting
+          - it
+    interview_dates:
+      type: [array, "null"]
+      items: { type: string, format: date }
+      description: >
+        Dates the employer has announced in the posting («first interviews on
+        17 and 18 August»). Kept as a field so they can be filtered and do not
+        surface first as a calendar clash.
+    deadline:
+      type: [string, "null"]
+      format: date
+      description: the application deadline; null until known
+    sent:
+      type: [string, "null"]
+      format: date
+      description: the day the application went out
+    solicited:
+      type: boolean
+      default: true
+      description: >
+        false for an unsolicited application, which answers no posting and
+        sits in the company's pool until a need arises. Silence is the
+        expected state there, not an implicit rejection, so these stay off
+        every follow-up list. Orthogonal to status.
+    interviewed:
+      type: [string, "null"]
+      format: date
+      description: >
+        The day of the first interview. Without it a rejection after an
+        interview looks exactly like a rejection on paper, and the
+        sent-to-interview ratio — the one number that says whether the
+        letters work — cannot be counted.
+    archived:
+      type: [string, "null"]
+      format: date
+      description: >
+        The day the posting was put away. Presence means archived. Does not
+        touch status: the two answer different questions.
+    archived_reason:
+      type: [string, "null"]
+      description: why — «expired», «too far away». Only meaningful with archived.
+    applicants:
+      type: [integer, "null"]
+      minimum: 0
+      description: >
+        How many applied, when the employer or the ATS says. It changes what
+        a rejection means: one out of a hundred is not one out of four.
+    rejected:
+      type: [string, "null"]
+      format: date
+      description: the day the rejection arrived
+    rejection_reasons:
+      type: [array, "null"]
+      items: { type: string, minLength: 1 }
+      description: >
+        Why they chose someone else, as THEY said it — one reason per item.
+        Your own interpretation belongs in Case notes.
+    hired_profile:
+      type: [string, "null"]
+      description: the background of the person who got the job — not a name
+    updated:
+      type: [string, "null"]
+      format: date
+
+maxTokens: 3000
+maxDepth: 3
+
+sections:
+  - header:
+      pattern: '^[A-Z]'
+      maxTokens: 14
+      description: the letter title, capitalized, kept short
+    maxContains: 1
+
+    sections:
+      - header: { const: Recipient }
+        maxContains: 1
+        description: who the letter is addressed to
+
+      - header: { const: Letter }
+        maxContains: 1
+        maxTokens: 900
+        description: the letter body — prose only, no bullet lists
+        blocks:
+          - type: paragraph
+            minContains: 3
+            description: a cover letter argues in prose, not in bullets
+        additionalBlocks: false
+
+      - header: { const: Closing }
+        maxContains: 1
+        description: sign-off and name
+
+      - header: { const: Contact log }
+        minContains: 0
+        maxContains: 1
+        description: >
+          What went back and forth between you and the employer: calls,
+          emails, interviews, feedback, the rejection. Newest first, one ###
+          entry per touch, headed «<ISO timestamp> <IN|OUT> <CHANNEL>».
+          Frontmatter holds the queryable state; this holds what was said.
+
+      - header: { const: Case notes }
+        minContains: 0
+        maxContains: 1
+        description: >
+          Dated observations where there was NO touch: gave up and why, the
+          role was re-posted, call preparation. Newest first, one ### entry
+          per note headed by its timestamp alone. Kept apart from the
+          contact log so your own notes never count as a follow-up.
+
+      - header: { const: Notes }
+        minContains: 0
+        maxContains: 1
+        description: >
+          Working notes on the letter itself: why it is put together the way
+          it is and which material it draws on. Not a log.
+
+    additionalSections: false
+
+additionalSections: false

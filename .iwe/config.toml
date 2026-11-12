@@ -1,0 +1,161 @@
+format = "markdown"
+version = 4
+
+[workspace]
+date_format = "%Y-%m-%d"
+path = ""
+
+[markdown]
+date_format = "%Y-%m-%d"
+refs_extension = ".md"
+refs_path = "relative"
+refs_text = "preserve"
+wiki_link_path = "preserve"
+
+[markdown.formatting]
+preserve_line_breaks = true
+
+[completion]
+link_format = "markdown"
+
+[search]
+language = "english"
+
+[actions.extract]
+key_template = "{{id}}"
+link_type = "markdown"
+title = "Extract"
+type = "extract"
+
+[actions.inline_section]
+inline_type = "section"
+keep_target = false
+title = "Inline section"
+type = "inline"
+
+[actions.link]
+key_template = "{{id}}"
+link_type = "markdown"
+title = "Link"
+type = "link"
+
+[actions.sort]
+reverse = false
+title = "Sort A-Z"
+type = "sort"
+
+# ---------------------------------------------------------------------------
+# Templates — used by `iwe new -t <name> "<title>"`
+# ---------------------------------------------------------------------------
+
+[templates.default]
+document_template = """
+# {{title}}
+
+{{content}}"""
+key_template = "{{slug}}"
+
+[templates.cv]
+key_template = "cv/{{slug}}"
+document_template = """---
+type: cv
+variant: {{slug}}
+language: en
+status: draft
+updated: {{today}}
+---
+
+# {{title}}
+
+## Summary
+
+{{content}}
+
+## Experience
+
+### Company — Position (YYYY–)
+
+- What you built, in one line that a stranger can verify.
+
+## Education
+
+### Institution — Degree, Field (YYYY–YYYY)
+
+## Skills
+
+- **Label** — details.
+"""
+
+[templates.cover-letter]
+key_template = "letters/{{slug}}"
+document_template = """---
+type: cover-letter
+company: "{{title}}"
+position: "To fill in"
+language: en
+status: draft
+cv: master
+url: null
+deadline: null
+sent: null
+updated: {{today}}
+---
+
+# Application: {{title}}
+
+## Recipient
+
+Company\\
+Address
+
+## Letter
+
+Dear ,
+
+{{content}}
+
+First paragraph: why them in particular. Concrete, and impossible to send to another company unchanged.
+
+Second paragraph: the bridge between what they need and what you have done.
+
+Third paragraph: concrete evidence. What you built, advised on or delivered.
+
+Fourth paragraph: how you work, and an invitation to talk.
+
+## Closing
+
+Kind regards,
+
+**Your Name**
+
+## Notes
+
+- Source of the posting:
+"""
+
+[templates.organization]
+key_template = "organizations/{{slug}}"
+document_template = """---
+type: organization
+name: "{{title}}"
+---
+
+# {{title}}
+
+## Applications
+
+{{content}}
+"""
+
+# ---------------------------------------------------------------------------
+# Schemas — checked by `iwe schema validate`
+# ---------------------------------------------------------------------------
+
+[schemas.cv]
+match = "cv/**"
+
+[schemas.cover-letter]
+match = "letters/**"
+
+[schemas.organization]
+match = "organizations/**"
